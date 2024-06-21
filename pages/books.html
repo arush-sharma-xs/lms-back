@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Books</title>
+    <style>
+      table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 1200px;
+      }
+
+      td,
+      th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+
+      tr:nth-child(even) {
+        background-color: #dddddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>LMS - All Books</h1>
+
+    <div id="output"></div>
+
+    <table id="booklist"></table>
+
+    <script type="text/javascript" defer>
+      window.addEventListener("load", fetchAllBooks);
+      const output = document.querySelector("#output");
+
+      async function fetchAllBooks() {
+        const response = await fetch("http://localhost:5101/book");
+        const { books } = await response.json();
+        console.log(books);
+
+        if (books.length == 0) {
+          output.textContent = "No book in the library";
+        }
+
+        const allBooks = books.map((book, index) => {
+          const encData = encodeURI(
+            `Name : ${book.title}\nAuthor : ${book.authors}\nPublisher : ${book.publisher}\nversion : ${book.version} `
+          );
+          return `<tr>
+                  <td>${index + 1}</td>
+                  <td>${book.title}</td>
+                  <td>${book.authors}</td>
+                  <td>${book.publisher}</td>
+                  <td>${book.version}</td>
+                  <td>${book.totalCopies}</td>
+                  <td>${book.availableCopies}</td>
+                  <td><img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encData}" /></td>
+                  <td><button class="removeBook" name="${
+                    book.ISBN
+                  }" >Remove</button></td>
+                </tr>`;
+        });
+
+        document.getElementById("booklist").innerHTML = `<tr>
+                                                        <th>S.No.</th>
+                                                        <th>Book'Name</th>
+                                                        <th>Author</th>
+                                                        <th>Publisher</th>
+                                                        <th>Version</th>
+                                                        <th>Total Copies</th>
+                                                        <th>Available Copies</th>
+                                                        <th>QR Code</th>
+                                                        <th>Action</th>
+                                                      </tr> ${allBooks.join(
+                                                        ","
+                                                      )}`;
+
+        const removeBtns = document.getElementsByClassName("removeBook");
+
+        for (let btn of removeBtns) {
+          btn.addEventListener("click", handleBookDeletion);
+        }
+      }
+
+      async function handleBookDeletion(e) {
+        await fetch(`http://localhost:5101/book/${e.target.name}`, {
+          method: "DELETE",
+        });
+        fetchAllBooks();
+      }
+    </script>
+  </body>
+</html>

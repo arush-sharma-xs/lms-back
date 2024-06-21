@@ -1,0 +1,88 @@
+<html>
+  <body>
+    <h1 class="heading">Library Management System - Reader page</h1>
+
+    <h2>Search Books :</h2>
+
+    <form id="searchForm" action="#" onsubmit="handleSearch">
+      <label for="searchBy">Search by :</label>
+      <select name="searchBy" id="searchBy">
+        <option value="title">title</option>
+        <option value="authors">author</option>
+        <option value="publisher">publishers</option>
+      </select>
+      <input type="text" name="search" placeholder="Search Book here" />
+      <button type="submit">Search</button>
+    </form>
+
+    <table id="results"></table>
+
+    <script type="text/javascript" defer>
+      const searchForm = document.getElementById("searchForm");
+      const handleSearch = (e) => {
+        e.preventDefault();
+        const formdata = new FormData(searchForm);
+        const key = formdata.get("searchBy");
+        const value = formdata.get("search");
+        searchBook(key, value);
+      };
+
+      const searchBook = async (key, value) => {
+        const response = await fetch(
+          `http://localhost:5101/search/${key}/${value}`
+        );
+        const { result } = await response.json();
+
+        const allBooks = result.map((book, index) => {
+          const encData = encodeURI(
+            `Name : ${book.title}\nAuthor : ${book.authors}\nPublisher : ${book.publisher}\nversion : ${book.version} `
+          );
+          return `<tr>
+                  <td>${index + 1}</td>
+                  <td>${book.title}</td>
+                  <td>${book.authors}</td>
+                  <td>${book.publisher}</td>
+                  <td>${book.version}</td>
+                  <td><img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encData}" /></td>
+                  <td><button class="raiseIssue" name="${
+                    book.ISBN
+                  }" >Raise Issue</button></td>
+                  <td><button class="raiseReturnIssue" name="${
+                    book.ISBN
+                  }" >Raise Return Issue</button></td>
+                </tr>`;
+        });
+
+        document.getElementById("results").innerHTML = `<tr>
+          <th>S.No.</th>
+                                                        <th>Book'Name</th>
+                                                        <th>Author</th>
+                                                        <th>Publisher</th>
+                                                        <th>Version</th>
+                                                        <th>QR Code</th>
+                                                        <th>Action</th>
+                                                        </tr> ${allBooks.join(
+                                                          ","
+                                                        )}`;
+      };
+
+      const raiseIssueBtn = document.getElementsByClassName("raiseIssue");
+      const raiseReturnIssueBtn =
+        document.getElementsByClassName("raiseReturnIssue");
+
+      for (let btn of raiseIssueBtn) {
+        btn.addEventListener("click", handleRaiseIssue);
+      }
+
+      for (let btn of raiseReturnIssueBtn) {
+        btn.addEventListener("click", handleRaiseReturnIssue);
+      }
+
+      const handleRaiseIssue = () => {};
+
+      const handleRaiseReturnIssue = () => {};
+
+      window.addEventListener("submit", handleSearch);
+    </script>
+  </body>
+</html>

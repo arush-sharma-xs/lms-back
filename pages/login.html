@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+  </head>
+  <body>
+    <h2>LMS - Login System</h2>
+    <p id="error" style="color: red"></p>
+
+    <form action="#" id="loginForm">
+      <input
+        type="number"
+        name="libId"
+        placeholder="library ID"
+        id="library Id"
+        value="1"
+        min="1"
+        max="5"
+      />
+      <input type="email" name="email" placeholder="Enter your Email Id" />
+      <button type="submit">Login</button>
+    </form>
+
+    <script type="text/javascript">
+      const loginForm = document.getElementById("loginForm");
+
+      const handleLogin = async (e) => {
+        e.preventDefault();
+        const formdata = new FormData(loginForm);
+        const email = formdata.get("email");
+        const libId = formdata.get("libId");
+        const res = await fetch("http://localhost:5101/auth", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ libId: parseInt(libId), email }),
+        });
+        const result = await res.json();
+        console.log(result);
+        if (res.status === 200) {
+          const role = result.userType;
+          localStorage.setItem(
+            "currentUser",
+            JSON.stringify({
+              libId: parseInt(libId),
+              email,
+            })
+          );
+          if (role === "admin") {
+            window.location = "/adminpage";
+          } else {
+            window.location = "/readerpage";
+          }
+        } else {
+          document.getElementById("error").textContent = result.error;
+        }
+      };
+      window.addEventListener("submit", handleLogin);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create User</title>
+  </head>
+  <body>
+    <div>
+      <h1>LMS - create New Account</h1>
+      <form action="#" id="createAccountForm">
+        <label for="title">Lib ID:</label>
+        <input type="number" name="libId" id="libId" />
+        <br />
+        <label for="name">Name: </label>
+        <input type="text" name="name" id="name" />
+        <br />
+        <label for="email">Email:</label>
+        <input type="text" name="email" id="email" />
+        <br />
+        <label for="contactNumber">Contact Number:</label>
+        <input type="text" name="contactNumber" id="contactNumber" />
+        <br />
+        <label for="role">Role:</label>
+        <select name="role" id="role">
+          <option value="admin">Admin</option>
+          <option value="reader">Reader</option>
+        </select>
+        <br />
+        <p id="result" style="color: green"></p>
+        <p id="error" style="color: red"></p>
+        <br />
+        <button type="submit">Create</button>
+      </form>
+    </div>
+    <script type="text/javascript">
+      const createAccountForm = document.querySelector("#createAccountForm");
+      const error = document.querySelector("#error");
+      const result = document.querySelector("#result");
+
+      const handleCreateAccount = async (e) => {
+        e.preventDefault();
+        const form = new FormData(createAccountForm);
+
+        console.log(form.get("role"));
+        for (const pair of form.entries()) {
+          // if invalid inputs --- falsy value
+          if (!pair[1]) {
+            error.textContent = pair[0] + " field is required...";
+            return;
+          }
+          error.textContent = "";
+        }
+
+        // send Data to server
+        const book = {
+          libId: parseInt(form.get("libId")),
+          name: form.get("name"),
+          email: form.get("email"),
+          contactNumber: form.get("contactNumber"),
+          role: form.get("role"),
+        };
+
+        console.log(book);
+
+        const response = await fetch("/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(book),
+        });
+
+        const res = await response.json();
+
+        !res.status
+          ? (error.textContent = res.error)
+          : (result.textContent = res.status);
+      };
+
+      createAccountForm.addEventListener("submit", handleCreateAccount);
+    </script>
+  </body>
+</html>
